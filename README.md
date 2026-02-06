@@ -2,7 +2,7 @@
 
 By **DEVELOPER710**
 
-A web-based Pokémon shiny hunting simulator inspired by classic encounter grinding.
+A web-based Pokémon shiny hunting simulator.
 
 ---
 
