@@ -1,38 +1,65 @@
+
 # ✨ Shiny Hunting Simulator ✨
 
-By **DEVELOPER710**
-
-A web-based Pokémon shiny hunting simulator.
+A simple, web-based **Pokémon Shiny Hunting Simulator** inspired by in-game encounters.
+Built to be lightweight, mobile-friendly, and easy to host on **GitHub Pages**.
 
 ---
 
-## 🔍 Features
+## 🎮 Features
 
-- Gen **1–5 Pokémon only** (excluding legendaries & mythicals)
-- **602 shiny-huntable Pokémon**
-- Default shiny odds: **1 / 30,000**
-- Encounter batches: **1 / 2 / 3 / 5**
-- Independent shiny rolls per Pokémon
-- **Shiny sparkle animation** (visual only, no sound)
-- Persistent progress using **LocalStorage**
-  - Total lifetime encounters
+- Hunt **all non-legendary Pokémon from Generation 1–5**
+- Manual Pokémon name input with validation
+- Encounter batches:
+  - 1 / 2 / 3 / 5 encounters per click
+- Default shiny odds: **1 / 30,000** per Pokémon
+- ✨ **Sparkle animation for shiny Pokémon only**
+- Persistent progress using `localStorage`:
   - Encounters since last shiny
-  - Full shiny history
-- Works fully on **GitHub Pages** (no backend)
+  - Lifetime total encounters
+  - Shiny history (with encounters count)
+- Mobile-friendly responsive layout
+- No audio, no external frameworks
 
 ---
 
-## 🎮 How It Works
+## 🕹️ How to Use
 
-1. Select a Pokémon species  
-2. Choose how many encounters to roll at once  
-3. Click **Start / Encounter**  
-4. Keep hunting until a shiny appears ✨  
+1. Enter a Pokémon name (official Pokédex spelling)
+2. Click **Start** to begin the hunt
+3. Click **Next** to repeat encounters
+4. A shiny will automatically:
+   - Show sparkle animation
+   - Reset the counter
+   - Be logged in shiny history
 
-When a shiny is found:
-- It’s logged permanently
-- Encounters since last shiny reset
-- Lifetime encounters keep increasing
+All progress is saved automatically — refreshing the page will **not** reset data.
 
-Refreshing the page will **NOT** reset your progress.
+---
 
+## 📦 Files
+
+- `index.html` – Main simulator (HTML, CSS, JS in one file)
+- `README.md` – Project documentation
+
+---
+
+## 🧠 Data Source
+
+- Pokémon sprites & data fetched from **PokéAPI**
+- Sprites used:
+  - `front_default`
+  - `front_shiny`
+
+---
+
+## 👤 Credits
+
+**By DEVELOPER710**
+
+Pokémon © Nintendo / Game Freak  
+This project is for educational and fan-use only.
+
+---
+
+✨ Happy shiny hunting!
