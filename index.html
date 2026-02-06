@@ -74,8 +74,9 @@
   </style>
 </head>
 <body>
-  <h1>✨ Shiny Hunting Simulator ✨</h1>  <div>
-    <select id="species"></select><select id="batch">
+  <h1>✨ Shiny Hunting Simulator ✨</h1>
+  <div style="margin-top:-6px; font-size:14px; opacity:0.8;">By DEVELOPER710</div>  <div>
+    <input id="speciesInput" type="text" placeholder="Enter Pokémon name" /><select id="batch">
   <option value="1">1 encounter</option>
   <option value="2">2 encounters</option>
   <option value="3">3 encounters</option>
@@ -101,7 +102,7 @@
     lifetimeCounter = parseInt(localStorage.getItem('lifetimeCounter')) || 0;
     let recentList = [];
 
-    const speciesSelect = document.getElementById('species');
+    const speciesInput = document.getElementById('speciesInput');
     const encountersDiv = document.getElementById('encounters');
     const counterSpan = document.getElementById('counter');
     const lifetimeSpan = document.getElementById('lifetime');
@@ -117,12 +118,7 @@
       shinyUl.appendChild(li);
     });
 
-    // Load Gen 1–5 Pokémon EXCEPT legendaries
-    fetch('https://pokeapi.co/api/v2/pokemon-species?limit=649')
-      .then(res => res.json())
-      .then(async data => {
-        for (const s of data.results) {
-          const res = await fetch(s.url);
+    // Pokémon list removed — users manually enter species name
           const species = await res.json();
 
           // Exclude legendaries & mythicals
@@ -137,6 +133,25 @@
       });
 
     function startEncounter() {
+      const species = speciesInput.value.trim().toLowerCase();
+      if (!species) {
+        alert('Please enter a Pokémon name.');
+        return;
+      }
+
+      // Validate Pokémon existence
+      fetch(`https://pokeapi.co/api/v2/pokemon/${species}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Not found');
+          return res.json();
+        })
+        .then(() => runEncounter(species))
+        .catch(() => {
+          alert('❌ Pokémon not found. Please check spelling.');
+        });
+    }
+
+    function runEncounter(species) {
       const species = speciesSelect.value;
       const batch = parseInt(document.getElementById('batch').value);
 
@@ -200,6 +215,9 @@
         li.textContent = name;
         recentUl.appendChild(li);
       });
+    }
+
+          renderRecent();
     }
 
     function capitalize(str) {
