@@ -83,7 +83,8 @@
   <option value="5">5 encounters</option>
 </select>
 
-<button onclick="startEncounter()">Start / Encounter</button>
+<button onclick="startEncounter()">Start</button>
+<button onclick="nextEncounter()">Next</button>
 
   </div>  <div class="counter">
     Encounters since last shiny: <span id="counter">0</span><br>
@@ -132,12 +133,39 @@
       });
       });
 
+    let currentSpecies = null;
+
     function startEncounter() {
       const species = speciesInput.value.trim().toLowerCase();
       if (!species) {
         alert('Please enter a Pokémon name.');
         return;
       }
+
+      encountersDiv.innerHTML = 'Loading...';
+
+      fetch(`https://pokeapi.co/api/v2/pokemon/${species}`)
+        .then(res => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then(poke => {
+          currentSpecies = { name: species, data: poke };
+          runEncounter(species, poke);
+        })
+        .catch(() => {
+          encountersDiv.innerHTML = '';
+          alert('❌ Pokémon not found. Please check spelling.');
+        });
+    }
+
+    function nextEncounter() {
+      if (!currentSpecies) {
+        alert('Start a hunt first.');
+        return;
+      }
+      runEncounter(currentSpecies.name, currentSpecies.data);
+    }
 
       // Validate Pokémon existence
       fetch(`https://pokeapi.co/api/v2/pokemon/${species}`)
