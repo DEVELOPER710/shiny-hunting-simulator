@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shiny Hunting Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f1220;
+      color: #eee;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 10px; }
+    select, button {
+      padding: 8px 12px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+      background: #4cafef;
+      border: none;
+      border-radius: 6px;
+      color: #000;
+      font-weight: bold;
+    }
+    .encounters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .poke {
+      background: #1b1f3a;
+      padding: 10px;
+      border-radius: 10px;
+      width: 120px;
+    }
+    .poke img {
+      width: 96px;
+      height: 96px;
+      image-rendering: pixelated;
+    }
+    .counter {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+    .history {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #14172c;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .history h3 { margin-top: 0; }
+    .shiny-log {
+      margin-top: 30px;
+      background: #1a2b1a;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .shiny {
+      color: #ffd700;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>✨ Shiny Hunting Simulator ✨</h1>  <div>
+    <select id="species"></select><select id="batch">
+  <option value="1">1 encounter</option>
+  <option value="2">2 encounters</option>
+  <option value="3">3 encounters</option>
+  <option value="5">5 encounters</option>
+</select>
+
+<button onclick="startEncounter()">Start / Encounter</button>
+
+  </div>  <div class="counter">
+    Encounters since last shiny: <span id="counter">0</span><br>
+    Total lifetime encounters: <span id="lifetime">0</span>
+  </div>  <div class="history">
+    <h3>Encounters since last shiny</h3>
+    <ul id="recent"></ul>
+  </div>  <div class="encounters" id="encounters"></div>  <div class="shiny-log">
+    <h3>✨ Shinies Found ✨</h3>
+    <ul id="shinyList"></ul>
+  </div>  <script>
+    const shinyOdds = 30000;
+    let counter = parseInt(localStorage.getItem('currentCounter')) || 0;
+    let lifetimeCounter = 0;
+    let shinyHistory = JSON.parse(localStorage.getItem('shinyHistory')) || [];
+    lifetimeCounter = parseInt(localStorage.getItem('lifetimeCounter')) || 0;
+    let recentList = [];
+
+    const speciesSelect = document.getElementById('species');
+    const encountersDiv = document.getElementById('encounters');
+    const counterSpan = document.getElementById('counter');
+    const lifetimeSpan = document.getElementById('lifetime');
+    lifetimeSpan.textContent = lifetimeCounter;
+        localStorage.setItem('lifetimeCounter', lifetimeCounter);
+    const recentUl = document.getElementById('recent');
+    const shinyUl = document.getElementById('shinyList');
+
+    // Render stored shiny history on load
+    shinyHistory.forEach(entry => {
+      const li = document.createElement('li');
+      li.innerHTML = entry;
+      shinyUl.appendChild(li);
+    });
+
+    // Load Gen 1–5 Pokémon EXCEPT legendaries
+    fetch('https://pokeapi.co/api/v2/pokemon-species?limit=649')
+      .then(res => res.json())
+      .then(async data => {
+        for (const s of data.results) {
+          const res = await fetch(s.url);
+          const species = await res.json();
+
+          // Exclude legendaries & mythicals
+          if (species.is_legendary || species.is_mythical) continue;
+
+          const opt = document.createElement('option');
+          opt.value = species.name;
+          opt.textContent = species.name.charAt(0).toUpperCase() + species.name.slice(1);
+          speciesSelect.appendChild(opt);
+        }
+      });
+      });
+
+    function startEncounter() {
+      const species = speciesSelect.value;
+      const batch = parseInt(document.getElementById('batch').value);
+
+      encountersDiv.innerHTML = '';
+
+      for (let i = 0; i < batch; i++) {
+        counter++;
+        localStorage.setItem('currentCounter', counter);
+        lifetimeCounter++;
+        lifetimeSpan.textContent = lifetimeCounter;
+        localStorage.setItem('lifetimeCounter', lifetimeCounter);
+        counterSpan.textContent = counter;
+    localStorage.setItem('currentCounter', counter);
+
+        const roll = Math.floor(Math.random() * shinyOdds) + 1;
+        const isShiny = roll === 1;
+
+        const pokeDiv = document.createElement('div');
+        pokeDiv.className = 'poke';
+
+        const img = document.createElement('img');
+        const idPromise = fetch(`https://pokeapi.co/api/v2/pokemon/${species}`)
+          .then(res => res.json())
+          .then(poke => {
+            img.src = isShiny ? poke.sprites.front_shiny : poke.sprites.front_default;
+            if (isShiny) img.classList.add('sparkle');
+          });
+
+        const name = document.createElement('div');
+        name.textContent = isShiny ? `✨ Shiny ${capitalize(species)}` : capitalize(species);
+        if (isShiny) name.classList.add('shiny');
+
+        pokeDiv.appendChild(img);
+        pokeDiv.appendChild(name);
+        encountersDiv.appendChild(pokeDiv);
+
+        recentList.push(isShiny ? `✨ Shiny ${capitalize(species)}` : capitalize(species));
+
+        if (isShiny) {
+          const li = document.createElement('li');
+          const entry = `✨ Shiny ${capitalize(species)} — ${counter} encounters since last shiny`;
+          li.innerHTML = entry;
+          shinyHistory.push(entry);
+          localStorage.setItem('shinyHistory', JSON.stringify(shinyHistory));
+          shinyUl.appendChild(li);
+
+          counter = 0;
+          localStorage.setItem('currentCounter', counter);
+          counterSpan.textContent = counter;
+          recentList = [];
+        }
+      }
+
+      renderRecent();
+    }
+
+    function renderRecent() {
+      recentUl.innerHTML = '';
+      recentList.forEach(name => {
+        const li = document.createElement('li');
+        li.textContent = name;
+        recentUl.appendChild(li);
+      });
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script></body>
+</html>
