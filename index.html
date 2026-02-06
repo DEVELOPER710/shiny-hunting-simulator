@@ -1,229 +1,190 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Shiny Hunting Simulator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f1220;
-      color: #eee;
-      text-align: center;
-      padding: 20px;
-    }
+<meta charset="UTF-8">
+<title>Shiny Hunting Simulator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    h1 { margin-bottom: 4px; }
+<style>
+body {
+  background:#0f1220;
+  color:#eee;
+  font-family:Arial, sans-serif;
+  text-align:center;
+  padding:20px;
+}
 
-    input, select, button {
-      padding: 8px 12px;
-      margin: 6px;
-      font-size: 16px;
-    }
+input, select, button {
+  padding:8px;
+  margin:6px;
+  font-size:16px;
+}
 
-    button {
-      cursor: pointer;
-      background: #4cafef;
-      border: none;
-      border-radius: 6px;
-      color: #000;
-      font-weight: bold;
-    }
+button {
+  background:#4cafef;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+}
 
-    .encounters {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-top: 20px;
-    }
+.encounters {
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:16px;
+  margin-top:20px;
+}
 
-    .poke {
-      background: #1b1f3a;
-      padding: 10px;
-      border-radius: 10px;
-      width: 120px;
-    }
+.poke {
+  background:#1b1f3a;
+  padding:10px;
+  border-radius:10px;
+  width:120px;
+}
 
-    .poke img {
-      width: 96px;
-      height: 96px;
-      image-rendering: pixelated;
-    }
+.poke img {
+  width:96px;
+  image-rendering:pixelated;
+}
 
-    .sparkle {
-      animation: sparkle 1s infinite alternate;
-      filter: drop-shadow(0 0 6px gold);
-    }
+.sparkle {
+  animation:sparkle 1s infinite alternate;
+  filter:drop-shadow(0 0 6px gold);
+}
 
-    @keyframes sparkle {
-      from { transform: scale(1); }
-      to { transform: scale(1.1); }
-    }
+@keyframes sparkle {
+  from {transform:scale(1);}
+  to {transform:scale(1.1);}
+}
 
-    .shiny {
-      color: gold;
-      font-weight: bold;
-    }
+.shiny { color:gold; font-weight:bold; }
 
-    .counter {
-      margin-top: 15px;
-      font-size: 18px;
-    }
+.counter { margin-top:15px; font-size:18px; }
 
-    .history, .shiny-log {
-      margin-top: 30px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      text-align: left;
-      background: #14172c;
-      padding: 15px;
-      border-radius: 10px;
-    }
-  </style></head>
-<body>  <h1>✨ Shiny Hunting Simulator ✨</h1>
-  <div style="font-size:14px; opacity:0.8;">By DEVELOPER710</div>
-  <br><br>  <input id="speciesInput" type="text" placeholder="Enter Pokémon name" />  <select id="batch">
-    <option value="1">1 encounter</option>
-    <option value="2">2 encounters</option>
-    <option value="3">3 encounters</option>
-    <option value="5">5 encounters</option>
-  </select>  <br>
-  <button onclick="startHunt()">Start</button>
-  <button onclick="nextEncounter()">Next</button>  <div class="counter">
-    Encounters since last shiny: <span id="counter">0</span><br>
-    Total lifetime encounters: <span id="lifetime">0</span>
-  </div>  <div class="history">
-    <h3>Encounters since last shiny</h3>
-    <ul id="recent"></ul>
-  </div>  <div class="encounters" id="encounters"></div>  <div class="shiny-log">
-    <h3>✨ Shinies Found ✨</h3>
-    <ul id="shinyList"></ul>
-  </div><script>
-const shinyOdds = 30000;
+.history {
+  margin-top:30px;
+  background:#14172c;
+  padding:15px;
+  border-radius:10px;
+}
+</style>
+</head>
 
-let counter = parseInt(localStorage.getItem("currentCounter")) || 0;
-let lifetimeCounter = parseInt(localStorage.getItem("lifetimeCounter")) || 0;
-let shinyHistory = JSON.parse(localStorage.getItem("shinyHistory")) || [];
-let recentList = [];
-let currentPokemon = null;
+<body>
 
-const speciesInput = document.getElementById("speciesInput");
-const encountersDiv = document.getElementById("encounters");
-const counterSpan = document.getElementById("counter");
-const lifetimeSpan = document.getElementById("lifetime");
-const recentUl = document.getElementById("recent");
-const shinyUl = document.getElementById("shinyList");
+<h1>✨ Shiny Hunting Simulator ✨</h1>
+<div style="opacity:0.8;">By DEVELOPER710</div>
+<br><br>
 
-counterSpan.textContent = counter;
-lifetimeSpan.textContent = lifetimeCounter;
+<input id="nameInput" placeholder="Enter Pokémon name">
+<select id="batch">
+  <option value="1">1 encounter</option>
+  <option value="2">2 encounters</option>
+  <option value="3">3 encounters</option>
+  <option value="5">5 encounters</option>
+</select>
+<br>
+<button onclick="start()">Start</button>
+<button onclick="next()">Next</button>
 
-shinyHistory.forEach(entry => {
+<div class="counter">
+Encounters since last shiny: <span id="counter">0</span><br>
+Lifetime encounters: <span id="lifetime">0</span>
+</div>
+
+<div class="encounters" id="encounters"></div>
+
+<div class="history">
+<h3>✨ Shiny History ✨</h3>
+<ul id="shinyLog"></ul>
+</div>
+
+<script>
+const odds = 30000;
+let currentName = null;
+
+let counter = Number(localStorage.getItem("counter")) || 0;
+let lifetime = Number(localStorage.getItem("lifetime")) || 0;
+let shinyLog = JSON.parse(localStorage.getItem("shinyLog")) || [];
+
+document.getElementById("counter").textContent = counter;
+document.getElementById("lifetime").textContent = lifetime;
+
+const shinyUl = document.getElementById("shinyLog");
+shinyLog.forEach(e => {
   const li = document.createElement("li");
-  li.innerHTML = entry;
+  li.textContent = e;
   shinyUl.appendChild(li);
 });
 
-function startHunt() {
-  const name = speciesInput.value.trim().toLowerCase();
-  if (!name) {
-    alert("Please enter a Pokémon name.");
-    return;
-  }
-
-  encountersDiv.innerHTML = "Loading...";
-
-  fetch(`https://pokeapi.co/api/v2/pokemon/${name}`)
-    .then(res => {
-      if (!res.ok) throw new Error();
-      return res.json();
-    })
-    .then(poke => {
-      currentPokemon = poke;
-      runEncounter();
-    })
-    .catch(() => {
-      encountersDiv.innerHTML = "";
-      alert("❌ Pokémon not found. Use official Pokédex names.");
-    });
+function sprite(name, shiny=false) {
+  return shiny
+    ? `https://play.pokemonshowdown.com/sprites/xyani-shiny/${name}.gif`
+    : `https://play.pokemonshowdown.com/sprites/xyani/${name}.gif`;
 }
 
-function nextEncounter() {
-  if (!currentPokemon) {
-    alert("Start a hunt first.");
-    return;
-  }
-  runEncounter();
+function start() {
+  const n = document.getElementById("nameInput").value.trim().toLowerCase();
+  if (!n) return alert("Enter a Pokémon name");
+  currentName = n;
+  run();
 }
 
-function runEncounter() {
-  const batch = parseInt(document.getElementById("batch").value);
-  encountersDiv.innerHTML = "";
+function next() {
+  if (!currentName) return alert("Start a hunt first");
+  run();
+}
 
-  for (let i = 0; i < batch; i++) {
+function run() {
+  const batch = Number(document.getElementById("batch").value);
+  const box = document.getElementById("encounters");
+  box.innerHTML = "";
+
+  for (let i=0;i<batch;i++) {
     counter++;
-    lifetimeCounter++;
+    lifetime++;
 
-    localStorage.setItem("currentCounter", counter);
-    localStorage.setItem("lifetimeCounter", lifetimeCounter);
+    const shiny = Math.floor(Math.random()*odds)===0;
 
-    counterSpan.textContent = counter;
-    lifetimeSpan.textContent = lifetimeCounter;
-
-    const isShiny = Math.floor(Math.random() * shinyOdds) === 0;
-
-    const box = document.createElement("div");
-    box.className = "poke";
+    const d = document.createElement("div");
+    d.className="poke";
 
     const img = document.createElement("img");
-    img.src = isShiny
-      ? currentPokemon.sprites.front_shiny
-      : currentPokemon.sprites.front_default;
-
-    if (isShiny) img.classList.add("sparkle");
+    img.src = sprite(currentName, shiny);
+    if (shiny) img.classList.add("sparkle");
 
     const label = document.createElement("div");
-    label.textContent = isShiny
-      ? `✨ Shiny ${capitalize(currentPokemon.name)}`
-      : capitalize(currentPokemon.name);
+    label.textContent = shiny
+      ? `✨ Shiny ${cap(currentName)}`
+      : cap(currentName);
 
-    if (isShiny) label.classList.add("shiny");
+    if (shiny) label.classList.add("shiny");
 
-    box.appendChild(img);
-    box.appendChild(label);
-    encountersDiv.appendChild(box);
+    d.appendChild(img);
+    d.appendChild(label);
+    box.appendChild(d);
 
-    recentList.push(label.textContent);
+    if (shiny) {
+      const entry = `Shiny ${cap(currentName)} — ${counter} encounters`;
+      shinyLog.push(entry);
+      localStorage.setItem("shinyLog", JSON.stringify(shinyLog));
 
-    if (isShiny) {
-      const entry = `✨ Shiny ${capitalize(currentPokemon.name)} — ${counter} encounters since last shiny`;
       const li = document.createElement("li");
-      li.innerHTML = entry;
+      li.textContent = entry;
       shinyUl.appendChild(li);
 
-      shinyHistory.push(entry);
-      localStorage.setItem("shinyHistory", JSON.stringify(shinyHistory));
-
       counter = 0;
-      localStorage.setItem("currentCounter", counter);
-      counterSpan.textContent = counter;
-      recentList = [];
     }
   }
 
-  renderRecent();
+  localStorage.setItem("counter", counter);
+  localStorage.setItem("lifetime", lifetime);
+  document.getElementById("counter").textContent = counter;
+  document.getElementById("lifetime").textContent = lifetime;
 }
 
-function renderRecent() {
-  recentUl.innerHTML = "";
-  recentList.forEach(n => {
-    const li = document.createElement("li");
-    li.textContent = n;
-    recentUl.appendChild(li);
-  });
-}
+function cap(s){return s[0].toUpperCase()+s.slice(1);}
+</script>
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-</script></body>
+</body>
 </html>
